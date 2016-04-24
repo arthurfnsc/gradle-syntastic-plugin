@@ -9,6 +9,12 @@ class SyntasticPlugin implements Plugin<Project> {
     static final TASK_NAME = 'syntastic'
 
     void apply(Project project) {
+        project.ext.syntasticConfigFile = project.file('.syntastic_javac_config')
+        syntasticTask(project)
+        //cleanTask(project)
+    }
+
+    void syntasticTask(Project project) {
         def task = project.tasks.create(TASK_NAME, Syntastic)
 
         task.with {
@@ -28,6 +34,12 @@ class SyntasticPlugin implements Plugin<Project> {
             }
         }
         project.rootProject.tasks.matching { it.name == 'build' }.all { dependsOn TASK_NAME }
+    }
+
+    void cleanTask(Project project) {
+        project.clean {
+            delete project.ext.syntasticConfigFile
+        }
     }
 
 }

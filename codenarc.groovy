@@ -33,6 +33,7 @@ ruleset {
     ruleset('rulesets/naming.xml') {
         'VariableName' finalRegex: "[a-z][a-zA-Z0-9]*"
         'MethodName' regex: "[a-z][\\*a-zA-Z ,]*"
+        'FieldName' 'ignoreFieldNames':  'isWindows, isTerm, isCygwin'
     }
     ruleset('rulesets/security.xml') {
         'JavaIoPackageAccess' enabled: false

@@ -18,7 +18,7 @@ class SyntasticPluginTest extends Specification {
         def task = project.tasks.syntastic
         assert task instanceof Syntastic
         assert task.output != null
-        assert task.classpath != null
+        assert task.syntasticPath != null
         task
     }
 
@@ -30,7 +30,7 @@ class SyntasticPluginTest extends Specification {
             def task = extractTask()
 
         then:
-            task.classpath.files.empty
+            task.syntasticPath.files.empty
     }
 
     def "it works on a java project"() {
@@ -42,7 +42,7 @@ class SyntasticPluginTest extends Specification {
             def task = extractTask()
 
         then:
-            !task.classpath.files.empty
+            !task.syntasticPath.files.empty
     }
 
     def "it works on a groovy project"() {
@@ -54,7 +54,7 @@ class SyntasticPluginTest extends Specification {
             def task = extractTask()
 
         then:
-            !task.classpath.files.empty
+            !task.syntasticPath.files.empty
     }
 
     @Requires({ SystemUtils.IS_OS_WINDOWS })

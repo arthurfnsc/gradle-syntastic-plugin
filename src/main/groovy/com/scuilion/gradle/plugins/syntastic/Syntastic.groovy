@@ -6,6 +6,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskExecutionException
 
 class Syntastic extends DefaultTask {
 
@@ -13,7 +14,7 @@ class Syntastic extends DefaultTask {
 
     @InputFiles
     @SkipWhenEmpty
-    FileCollection getClasspath() {
+    FileCollection getSyntasticPath() {
         resolver.call()
     }
 
@@ -22,10 +23,17 @@ class Syntastic extends DefaultTask {
     }
 
     @OutputFile
-    File output = project.file('.syntastic_javac_config')
+    File output = project.ext.syntasticConfigFile
 
+    String fileSeperator = File.pathSeparator
+
+    def value
     String getValue() {
-        classpath.files.join File.pathSeparator
+        value = syntasticPath
+        if (isCygwinEnv(project)) {
+            value = cygpath()
+        }
+        value.join fileSeperator
     }
 
     @TaskAction
@@ -33,6 +41,30 @@ class Syntastic extends DefaultTask {
         output.withWriter {
             it.write "let g:syntastic_java_javac_classpath = \"${value}\"\n"
         }
+    }
+
+    def isCygwinEnv(def project) {
+        Utils.isCygwin && !project.hasProperty('disableCygwin')
+    }
+
+    def cygpath() {
+        fileSeperator = ':'
+        def results = project.exec {
+            executable = 'cygpath'
+            args = ['-u'] + syntasticPath
+            standardOutput = new ByteArrayOutputStream()
+            output = {
+                return standardOutput.toString()
+            }
+        }
+        if (results.exitValue) {
+            throw new TaskExecutionException('Failed to call cygdrive. Error: ' + results)
+        }
+        def cygPath = ''
+        output().eachLine {
+            cygPath << it
+        }
+        value = cygPath
     }
 
 }
