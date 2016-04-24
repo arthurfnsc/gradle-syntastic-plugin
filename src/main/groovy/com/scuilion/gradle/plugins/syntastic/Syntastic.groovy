@@ -27,9 +27,8 @@ class Syntastic extends DefaultTask {
 
     String fileSeperator = File.pathSeparator
 
-    def value
     String getValue() {
-        value = syntasticPath
+        def value = syntasticPath
         if (isCygwinEnv(project)) {
             value = cygpath()
         }
@@ -49,22 +48,23 @@ class Syntastic extends DefaultTask {
 
     def cygpath() {
         fileSeperator = ':'
+        def cygpathOut = ''
         def results = project.exec {
             executable = 'cygpath'
             args = ['-u'] + syntasticPath
             standardOutput = new ByteArrayOutputStream()
-            output = {
+            cygpathOut = {
                 return standardOutput.toString()
             }
         }
         if (results.exitValue) {
             throw new TaskExecutionException('Failed to call cygdrive. Error: ' + results)
         }
-        def cygPath = ''
-        output().eachLine {
+        def cygPath = []
+        cygpathOut().eachLine {
             cygPath << it
         }
-        value = cygPath
+        cygPath
     }
 
 }
